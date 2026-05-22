@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -37,6 +36,24 @@ double withdraw(double balance, double amount) {
     return balance - amount;
 }
 
+void printAccounts(const std::vector<std::string>& names, const std::vector<double>& balances) {
+    std::cout << "--- Accounts ---\n";
+
+    for (size_t i { }; i < names.size(); ++i) {
+        std::string n { names.at(i) };
+        double b { balances.at(i) };
+
+        std::string accountType { };
+        if (b > 1000) {
+            accountType = "Premium";
+        } else {
+            accountType = "Standard";
+        }
+
+        std::cout << (i + 1)  << ". " << n << " $" << std::fixed << std::setprecision(2) << b << " [" << accountType << "]\n";
+    }
+}
+
 int main() {
     std::vector<std::string> transactionHistories { };
 
@@ -46,6 +63,11 @@ int main() {
     int numAccounts { };
     std::cout << "How many accounts? ";
     std::cin >> numAccounts;
+
+    while (numAccounts < 1 || numAccounts > 5) {
+        std::cout << "Please enter a number between 1 and 5: ";
+        std::cin >> numAccounts;
+    }
 
     for (int i { 1 }; i <= numAccounts; ++i) {
         std::cout << '\n';
@@ -61,6 +83,15 @@ int main() {
 
         std::cout << "Account " << i << " opening balance: ";
         std::cin >> balance;
+
+        while (balance < 0) {
+            std::cout << "Your opening balance cannot be negative.\n";
+            std::cout << '\n';
+
+            std::cout << "Account " << i << " opening balance: ";
+            std::cin >> balance;
+        }
+
         balances.push_back(balance);
 
         transactionHistories.push_back("");
@@ -68,36 +99,17 @@ int main() {
 
     std::cout << '\n';
 
-    std::cout << "--- Accounts ---\n";
-    for (size_t i { }; i < names.size(); ++i) {
-        std::string name { names.at(i) };
-        double balance { balances.at(i) };
-
-        if (balance < 0) {
-            std::cout <<"Your opening balance cannot be negative.\n";
-            return 0;
-        }
-
-        std::string accountType { };
-        if (balance > 1000) {
-            accountType = "Premium";
-        } else {
-            accountType = "Standard";
-        }
-
-        std::cout << (i + 1)  << ". " << name << " $" << std::fixed << std::setprecision(2) << balance << " [" << accountType << "]\n";
-    }
+    printAccounts(names, balances);
 
     std::cout << '\n';
 
     size_t selectedAccountIndex { 0 };
-    std::string name = names.at(selectedAccountIndex);
-    double balance = balances.at(selectedAccountIndex);
-
-    bool menuLoop { true };
 
     // menu loop
-    while (menuLoop) {
+    while (true) {
+        std::string name = names.at(selectedAccountIndex);
+        double& balance = balances.at(selectedAccountIndex);
+
         std::cout << '\n';
 
         std::cout << "Active account: " << name << '\n';
@@ -122,7 +134,7 @@ int main() {
 
                 newIndex--;
 
-                if (newIndex < 0 || static_cast<size_t>(newIndex) > names.size()) {
+                if (newIndex < 0 || static_cast<size_t>(newIndex) >= names.size()) {
                     std::cout << "Please select a number between 1-" << names.size() << ".\n";
 
                     continue;
@@ -130,10 +142,7 @@ int main() {
 
                 selectedAccountIndex = static_cast<size_t>(newIndex);
 
-                name = names.at(selectedAccountIndex);
-                balance = balances.at(selectedAccountIndex);
-
-                std::cout << "Switched to " << name << ".\n";
+                std::cout << "Switched to " << names.at(selectedAccountIndex) << ".\n";
 
                 break;
             }
@@ -185,41 +194,17 @@ int main() {
                 break;
             }
             case 4: {
-                std::cout << "--- Accounts ---\n";
-                for (size_t i { }; i < names.size(); ++i) {
-                    std::string n { names.at(i) };
-                    double b { balances.at(i) };
-
-                    if (b < 0) {
-                        std::cout <<"Your opening balance cannot be negative.\n";
-                        return 0;
-                    }
-
-                    std::string accountType { };
-                    if (b > 1000) {
-                        accountType = "Premium";
-                    } else {
-                        accountType = "Standard";
-                    }
-
-                    std::cout << (i + 1)  << ". " << n << " $" << std::fixed << std::setprecision(2) << b << " [" << accountType << "]\n";
-                }
+                printAccounts(names, balances);
 
                 std::cout << "Goodbye!\n";
 
-                menuLoop = false;
-
-                break;
+                return 0;
             }
             default: {
                 std::cout << "Please input a number 0-4.\n";
 
                 break;
             }
-        }
-
-        if (!menuLoop) {
-            break;
         }
     }
 
